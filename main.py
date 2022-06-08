@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import sys
+import re
 import pathlib
+
+
 
 def valid_target_dir(path):
     path = pathlib.Path(path)
@@ -11,6 +13,7 @@ def valid_target_dir(path):
             return path
     except OSError:
         raise argparse.ArgumentTypeError('%s is not a valid directory' % (path,))
+
 
 def valid_result_dir(path):
     path = pathlib.Path(path)
@@ -22,16 +25,8 @@ def valid_result_dir(path):
                 os.mkdir(path)
             except OSError:
                 raise argparse.ArgumentTypeError('%s is not a valid directory' % (path,))
-
     except OSError:
         raise argparse.ArgumentTypeError('%s is not a valid directory' % (path,))
-
-
-def print_hi(name):
-    if len(sys.argv) > 1:
-        print(*sys.argv[1:])
-
-
 
 
 def init_args():
@@ -42,8 +37,23 @@ def init_args():
     return parser.parse_args()
     # print(parser.parse_args())
 
+def gerenerate_file_mask():
+    FileTypes = ('.jpg', '.mp4')
+
+
+
+def generate_list_of_edit_files(directory: pathlib.Path):
+    file_list = []  # A list for storing files existing in directories
+    for x in directory.iterdir():
+        if x.is_file() and x.name :
+            file_list.append(x)
+        # else:
+        # file_list.append(searching_all_files(directory / x))
+    return file_list
+
 
 # Piress the green button in the gutter to run the script.
 if __name__ == '__main__':
     args = init_args()
+    generate_list_of_edit_files(pathlib.Path(args.targetPath))
     print(args.__dict__)
