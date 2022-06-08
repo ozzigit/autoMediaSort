@@ -4,6 +4,9 @@ import os
 import re
 import pathlib
 
+month = (
+    'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь')
+
 
 def valid_target_dir(path_attr):
     path = pathlib.Path(path_attr)
@@ -49,7 +52,7 @@ def generate_list_of_edit_files(directory: pathlib.Path):
     for x in directory.iterdir():
         if x.is_file() and gerenerate_file_mask(x.name):
             file_list.append(str(x))
-        # else:
+        # else: возможно добавить обработку вложенных папок через рекурсию
         # file_list.append(searching_all_files(directory / x))
     return file_list
 
@@ -62,7 +65,9 @@ def checkYearDir_orCreate(fileName):
 
 def checkMothDir_orCreate(fileName):
     dirYearName = fileName[:4]
-    dirMonthName = fileName[4:6]
+    dirMonthNum = int(fileName[4:6]) - 1
+    dirMonthName = month[dirMonthNum]
+
     valid_result_dir(args.resultPath + '/' + dirYearName + '/' + dirMonthName)
     return dirMonthName
 
@@ -74,4 +79,20 @@ if __name__ == '__main__':
         dist_dir = args.resultPath + '/' + checkYearDir_orCreate(pathlib.Path(fileName).name)
         if args.withMonth in ('Yy'):
             dist_dir += '/' + checkMothDir_orCreate(pathlib.Path(fileName).name) + '/'
-        pathlib.Path(args.targetPath + '/' + fileName).rename(dist_dir + pathlib.Path(fileName).name)
+
+        # check if file exist
+        if pathlib.Path(dist_dir + fileName).is_file():
+            index_name = 1
+            clearFileName = pathlib.Path(fileName).name[:fileName.rfind('.')]
+            typeFile = pathlib.Path(fileName).name[fileName.rfind('.'):]
+            while pathlib.Path(dist_dir + clearFileName + 'new' + str(index_name) + '.' + typeFile).is_file():
+                index_name += 1
+            try:
+                pathlib.Path(fileName).rename(dist_dir + clearFileName + 'new' + str(index_name) + typeFile)
+            except OSError:
+                raise argparse.ArgumentTypeError("%s catn't move file" % (fileName,))
+        else:
+            try:
+                pathlib.Path(fileName).rename(dist_dir + pathlib.Path(fileName).name)
+            except OSError:
+                raise argparse.ArgumentTypeError("%s catn't move file" % (fileName,))
